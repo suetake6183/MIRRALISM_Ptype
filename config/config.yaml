@@ -1,0 +1,66 @@
+# MIRRALISM プロトタイプ設定ファイル
+# Version: 1.0.0
+# Created: 2025-06-10
+
+# API設定
+api:
+  taskmaster:
+    endpoint: "http://localhost:3000/api"  # TaskMaster APIエンドポイント
+    timeout: 30  # タイムアウト（秒）
+    retry_count: 3  # リトライ回数
+  
+  claude:
+    api_key: "${CLAUDE_API_KEY}"  # 環境変数から取得
+    model: "claude-3-opus-20240229"  # 使用モデル
+    max_tokens: 4096  # 最大トークン数
+    temperature: 0.7  # 生成の多様性
+
+# ディレクトリパス設定
+directories:
+  base_path: "/Users/suetakeshuuhei/MIRRALISM_PROTOTYPE"
+  input: "${directories.base_path}/input"
+  process: "${directories.base_path}/process"
+  output: "${directories.base_path}/output"
+  temp: "${directories.base_path}/tmp"
+  legacy: "${directories.base_path}/legacy"
+
+# ファイル管理設定
+file_management:
+  auto_cleanup:
+    enabled: true
+    archive_after_days: 7  # アーカイブまでの日数
+    delete_after_days: 30  # 削除までの日数
+  
+  naming_rules:
+    date_format: "%Y%m%d"  # 日付フォーマット
+    prefixes:
+      - "test_"
+      - "memo_"
+      - "draft_"
+      - "temp_"
+
+# 構造化エンジン設定
+structuring:
+  extract_elements:
+    - "目標"
+    - "課題"
+    - "解決策"
+    - "コスト"
+    - "時間"
+    - "パフォーマンス"
+  
+  output_formats:
+    - "json"
+    - "markdown"
+
+# システム設定
+system:
+  log_level: "INFO"  # ログレベル（DEBUG, INFO, WARNING, ERROR）
+  encoding: "utf-8"  # 文字エンコーディング
+  timezone: "Asia/Tokyo"  # タイムゾーン
+
+# パフォーマンス設定
+performance:
+  processing_timeout: 3  # 構造化処理タイムアウト（秒）
+  search_timeout: 1  # 検索タイムアウト（秒）
+  max_concurrent_requests: 5  # 最大同時リクエスト数
