@@ -1,0 +1,47 @@
+# Task ID: 3
+# Title: TaskMaster API連携実装
+# Status: pending
+# Dependencies: 1
+# Priority: high
+# Description: 既存のTaskMaster APIと連携し、タスク情報を取得・表示するコネクタを実装する
+# Details:
+TaskMaster統合機能を実装するため、以下の作業を行う：
+
+1. TaskMaster API連携クラスの作成（src/integrations/taskmaster_connector.py）
+   - API認証処理
+   - タスク取得メソッド
+   - タスク状態更新メソッド
+   - エラーハンドリング
+
+2. レガシーコードの活用
+   - /legacy/evaluated/taskmaster_integration/ から使用可能なコードを特定
+   - 参照またはインポートで再利用（コピー禁止）
+   - used_legacy.mdに使用記録を残す
+
+3. キャッシュ機能の実装
+   - API呼び出し頻度を抑えるためのローカルキャッシュ
+   - 有効期限設定（5分）
+
+4. 接続状態監視
+   - 接続エラー検出
+   - 再接続ロジック
+   - オフラインモード対応
+
+使用技術：
+- Python 3.10以上
+- requests 2.31.0（API通信）
+- tenacity 8.2.2（リトライロジック）
+- diskcache 5.6.1（キャッシュ機能）
+
+# Test Strategy:
+1. TaskMaster API接続テスト
+   - 認証テスト
+   - タスク取得テスト
+   - タスク更新テスト
+2. モックサーバーを使用したオフラインテスト
+3. エラーハンドリングテスト
+   - タイムアウト
+   - 認証エラー
+   - サーバーエラー
+4. キャッシュ機能テスト
+5. 統合テストスイートのTaskMaster接続テストを実行

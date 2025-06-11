@@ -1,0 +1,43 @@
+# Task ID: 11
+# Title: Issue管理システム実装
+# Status: pending
+# Dependencies: 1
+# Priority: medium
+# Description: 問題対処フレームワークに基づくIssue管理システムを実装する
+# Details:
+Issue管理システムを実装する：
+
+1. Issue.mdテンプレート作成（docs/templates/issue_template.md）
+   - 問題報告フォーマット
+   - 改善アイデアフォーマット
+
+2. Issue管理ユーティリティの実装（src/utils/issue_manager.py）
+   - 新規Issue作成関数
+   - Issue一覧表示関数
+   - Issue更新関数
+   - 優先順位管理関数
+
+3. 判定基準の実装
+   - MVP必須/後回し可能の判定ロジック
+   - 優先度自動計算
+
+4. CLIインターフェース
+   - コマンドライン操作
+   - 対話式Issue作成
+
+使用技術：
+- Python 3.10以上
+- click 8.1.7（CLIフレームワーク）
+- rich 13.5.2（ターミナル出力装飾）
+- PyYAML 6.0（設定管理）
+
+# Test Strategy:
+1. Issue作成テスト
+   - フォーマット検証
+   - 保存確認
+2. Issue管理機能テスト
+   - 一覧表示
+   - 更新
+   - 優先順位管理
+3. CLI操作テスト
+4. エラーハンドリングテスト

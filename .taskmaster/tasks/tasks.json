@@ -1,0 +1,213 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "プロジェクト基盤構築",
+      "description": "プロジェクトの基本構造とディレクトリ階層を作成し、必要な設定ファイルを準備する",
+      "details": "以下の作業を実施する：\n1. 指定されたディレクトリ構造を作成\n```\n/MIRRALISM/\n├── /src/          # ソースコードのみ\n├── /data/         # 永続データのみ\n├── /docs/         # 正式ドキュメントのみ\n├── /tmp/          # 全ての一時ファイル\n│   ├── /daily/    # 日付フォルダ自動生成\n│   └── /archive/  # 7日経過で自動移動\n└── /legacy/       # 過去データ置き場\n    ├── /evaluated/ # 評価済み（使える）\n    ├── /pending/   # 未評価\n    └── /rejected/  # 評価済み（使えない）\n```\n2. データ管理用のディレクトリ構造も作成\n```\n/MIRRALISM/data/\n├── /input/    # 生データ置き場\n├── /process/  # 処理中データ\n├── /output/   # 構造化済みデータ\n└── /config/   # 設定ファイル\n```\n3. 基本設定ファイル（config.yaml）を作成し、以下の項目を含める：\n   - API接続情報（Claude API、TaskMaster API）\n   - ファイルパス設定\n   - ログ設定\n   - 自動クリーンアップ設定\n\n使用技術：\n- Python 3.10以上\n- PyYAML 6.0以上（設定ファイル管理用）\n- dotenv 1.0.0以上（環境変数管理用）",
+      "testStrategy": "1. ディレクトリ構造が正しく作成されていることを確認するテストスクリプトを作成\n2. config.yamlが正しく読み込めることを確認\n3. 環境変数が正しく設定されていることを確認\n4. check_rules.pyを実行して、ファイル行数制限（50-120行）に違反していないことを確認",
+      "priority": "high",
+      "dependencies": [],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 2,
+      "title": "自動クリーンアップシステム実装",
+      "description": "一時ファイルの自動管理と整理を行うシステムを実装する",
+      "details": "一時ファイル管理戦略に基づき、以下の機能を実装する：\n\n1. 起動時に実行される自動クリーンアップスクリプト（cleanup.py）を作成\n   - 7日以上前の/daily/ディレクトリを/archive/へ移動\n   - 30日以上前の/archive/ディレクトリを削除\n   - ルートディレクトリの「迷子ファイル」を/tmp/へ強制移動\n\n2. 一時ファイル作成ユーティリティ関数を実装\n   - 必須プレフィックス（test_、memo_、draft_、temp_）を強制\n   - 日付フォルダの自動生成（/tmp/daily/YYYY-MM-DD/）\n   - ファイル名に日付を自動付与\n\n3. 定期実行のためのスケジューラー設定\n   - システム起動時に自動実行\n   - 毎日深夜に自動実行（バックアップ用）\n\n使用技術：\n- Python 3.10以上\n- pathlib（パス操作）\n- shutil（ファイル操作）\n- datetime（日付処理）\n- schedule 1.2.0（定期実行）",
+      "testStrategy": "1. 各クリーンアップ機能の単体テスト\n   - 古いファイルの移動テスト\n   - 古いアーカイブの削除テスト\n   - 迷子ファイルの移動テスト\n2. 日付フォルダ自動生成のテスト\n3. ファイル命名規則の強制テスト\n4. エッジケース（権限エラー、ファイルロック等）のテスト\n5. check_rules.pyによるコード規約チェック",
+      "priority": "medium",
+      "dependencies": [
+        1
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 3,
+      "title": "TaskMaster API連携実装",
+      "description": "既存のTaskMaster APIと連携し、タスク情報を取得・表示するコネクタを実装する",
+      "details": "TaskMaster統合機能を実装するため、以下の作業を行う：\n\n1. TaskMaster API連携クラスの作成（src/integrations/taskmaster_connector.py）\n   - API認証処理\n   - タスク取得メソッド\n   - タスク状態更新メソッド\n   - エラーハンドリング\n\n2. レガシーコードの活用\n   - /legacy/evaluated/taskmaster_integration/ から使用可能なコードを特定\n   - 参照またはインポートで再利用（コピー禁止）\n   - used_legacy.mdに使用記録を残す\n\n3. キャッシュ機能の実装\n   - API呼び出し頻度を抑えるためのローカルキャッシュ\n   - 有効期限設定（5分）\n\n4. 接続状態監視\n   - 接続エラー検出\n   - 再接続ロジック\n   - オフラインモード対応\n\n使用技術：\n- Python 3.10以上\n- requests 2.31.0（API通信）\n- tenacity 8.2.2（リトライロジック）\n- diskcache 5.6.1（キャッシュ機能）",
+      "testStrategy": "1. TaskMaster API接続テスト\n   - 認証テスト\n   - タスク取得テスト\n   - タスク更新テスト\n2. モックサーバーを使用したオフラインテスト\n3. エラーハンドリングテスト\n   - タイムアウト\n   - 認証エラー\n   - サーバーエラー\n4. キャッシュ機能テスト\n5. 統合テストスイートのTaskMaster接続テストを実行",
+      "priority": "high",
+      "dependencies": [
+        1
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 4,
+      "title": "Claude API連携実装",
+      "description": "Claude APIと連携し、会話の構造化処理を行うコネクタを実装する",
+      "details": "会話構造化エンジンの核となるClaude API連携を実装する：\n\n1. Claude API連携クラスの作成（src/integrations/claude_connector.py）\n   - API認証処理\n   - プロンプト送信メソッド\n   - レスポンス解析メソッド\n   - エラーハンドリング\n\n2. 構造化プロンプトテンプレートの作成\n   - 目標、課題、解決策、コスト、時間、パフォーマンスの抽出指示\n   - JSON形式での出力指定\n   - エッジケース対応の指示\n\n3. レート制限対応\n   - API使用量監視\n   - スロットリング実装\n   - 使用量アラート\n\n4. コスト最適化\n   - トークン数計算\n   - 必要最小限のコンテキスト送信\n\n使用技術：\n- Python 3.10以上\n- anthropic 0.5.0（Claude API公式クライアント）\n- jinja2 3.1.2（プロンプトテンプレート）\n- tiktoken 0.4.0（トークン数計算）\n- backoff 2.2.1（レート制限対応）",
+      "testStrategy": "1. Claude API接続テスト\n   - 認証テスト\n   - 基本プロンプト送信テスト\n   - レスポンス解析テスト\n2. 構造化処理の精度テスト\n   - サンプル会話データを使用した構造化テスト\n   - 抽出要素の網羅性確認\n3. エラーハンドリングテスト\n   - タイムアウト\n   - レート制限\n   - 認証エラー\n4. トークン数計算の正確性テスト\n5. 統合テストスイートのAPI応答確認テストを実行",
+      "priority": "high",
+      "dependencies": [
+        1
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 5,
+      "title": "会話構造化エンジン実装",
+      "description": "会話テキストを受け取り、Claude APIを使用して構造化する中核エンジンを実装する",
+      "details": "会話構造化エンジンの本体を実装する：\n\n1. 構造化エンジンクラスの作成（src/engines/structuring_engine.py）\n   - 入力テキスト前処理\n   - Claude API呼び出し\n   - 構造化結果の後処理\n   - JSON/Markdown形式変換\n\n2. 構造化ロジックの実装\n   - 会話テキスト分析\n   - 重要要素抽出（目標、課題、解決策、コスト、時間、パフォーマンス）\n   - 構造化データ生成\n\n3. 入力ソース対応\n   - テキスト直接入力\n   - ファイルアップロード（.txt, .md, .docx）\n   - URL指定（ウェブページ内容取得）\n\n4. 出力フォーマット\n   - JSON形式（プログラム処理用）\n   - Markdown形式（人間可読用）\n   - 視覚的サマリー用データ構造\n\n使用技術：\n- Python 3.10以上\n- anthropic 0.5.0（Claude API）\n- beautifulsoup4 4.12.2（ウェブスクレイピング）\n- python-docx 0.8.11（Word文書処理）\n- markdown 3.4.3（Markdown生成）\n- pydantic 2.4.2（データ検証）",
+      "testStrategy": "1. 各入力ソースからの構造化テスト\n   - テキスト入力テスト\n   - ファイルアップロードテスト\n   - URL指定テスト\n2. 構造化精度テスト\n   - サンプルデータセットを使用した精度評価\n   - 要素抽出の網羅性確認\n3. 出力フォーマットテスト\n   - JSON形式の検証\n   - Markdown形式の検証\n4. エラーケースのテスト\n   - 不完全な入力\n   - 構造化困難なテキスト\n5. パフォーマンステスト（処理時間3秒以内）",
+      "priority": "high",
+      "dependencies": [
+        4
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 6,
+      "title": "情報一元管理システム実装",
+      "description": "構造化されたデータを保存、検索、管理するシステムを実装する",
+      "details": "情報一元管理システムを実装する：\n\n1. データ管理クラスの作成（src/data/data_manager.py）\n   - データ保存機能\n   - データ取得機能\n   - 検索機能\n   - バージョン管理\n\n2. ファイルベースデータベースの実装\n   - 指定ディレクトリ構造に従ったファイル保存\n   - メタデータ管理\n   - インデックス作成\n\n3. 重複防止機能\n   - コンテンツハッシュ計算\n   - 類似度チェック\n   - 重複警告・防止\n\n4. 検索エンジン実装\n   - ファイル名検索\n   - 内容全文検索\n   - メタデータ検索\n   - 関連情報自動表示\n\n使用技術：\n- Python 3.10以上\n- TinyDB 4.8.0（軽量JSONデータベース）\n- whoosh 2.7.4（全文検索エンジン）\n- xxhash 3.2.0（高速ハッシュ計算）\n- difflib（類似度チェック）\n- gitpython 3.1.31（バージョン管理）",
+      "testStrategy": "1. データ保存・取得テスト\n   - 各種データ形式の保存テスト\n   - 取得精度テスト\n2. 検索機能テスト\n   - ファイル名検索テスト\n   - 内容検索テスト\n   - 複合検索テスト\n3. 重複防止テスト\n   - 同一内容保存テスト\n   - 類似内容検出テスト\n4. バージョン管理テスト\n5. パフォーマンステスト（検索応答1秒以内）",
+      "priority": "high",
+      "dependencies": [
+        1,
+        2
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 7,
+      "title": "基本的なUI実装",
+      "description": "シンプルなHTML/CSS/JSを使用した基本的なユーザーインターフェースを実装する",
+      "details": "シンプルなWebインターフェースを実装する：\n\n1. 基本レイアウトの作成\n   - ヘッダー（TaskMaster情報表示エリア）\n   - メインコンテンツエリア\n   - サイドバー（ナビゲーション）\n   - フッター\n\n2. 主要画面の実装\n   - ホーム画面\n   - 会話入力・構造化画面\n   - 検索・閲覧画面\n   - 設定画面\n\n3. TaskMaster統合表示バー\n   - 現在のタスク・目的の常時表示\n   - 次のアクションの表示\n   - タスク逸脱時のアラート表示\n\n4. レスポンシブデザイン\n   - モバイル対応\n   - デスクトップ最適化\n\n使用技術：\n- HTML5\n- CSS3（Flexbox/Grid）\n- JavaScript（Vanilla JS、フレームワークなし）\n- Fetch API（バックエンド通信）\n- LocalStorage（クライアント側状態管理）",
+      "testStrategy": "1. 各画面の表示テスト\n   - レイアウト確認\n   - レスポンシブ動作確認\n2. TaskMaster表示バーのテスト\n   - 情報表示テスト\n   - アラート表示テスト\n3. ブラウザ互換性テスト\n   - Chrome、Firefox、Edgeでのテスト\n4. アクセシビリティテスト\n   - キーボード操作\n   - スクリーンリーダー対応",
+      "priority": "medium",
+      "dependencies": [
+        3,
+        6
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 8,
+      "title": "バックエンドAPI実装",
+      "description": "フロントエンドとバックエンドを接続するRESTful APIを実装する",
+      "details": "バックエンドAPIを実装する：\n\n1. APIサーバーの作成（src/api/server.py）\n   - RESTful APIエンドポイント定義\n   - リクエスト処理\n   - レスポンス生成\n   - エラーハンドリング\n\n2. 主要エンドポイントの実装\n   - `/api/structure` - 会話構造化\n   - `/api/search` - データ検索\n   - `/api/tasks` - TaskMaster情報取得\n   - `/api/save` - データ保存\n\n3. セキュリティ対策\n   - 入力バリデーション\n   - CORS設定\n   - レート制限\n   - エラー情報の適切な制限\n\n4. パフォーマンス最適化\n   - 非同期処理\n   - キャッシュ設定\n   - 応答時間監視\n\n使用技術：\n- Python 3.10以上\n- FastAPI 0.103.1（APIフレームワーク）\n- Pydantic 2.4.2（データバリデーション）\n- uvicorn 0.23.2（ASGIサーバー）\n- starlette 0.27.0（CORS、ミドルウェア）",
+      "testStrategy": "1. 各エンドポイントの単体テスト\n   - 正常系テスト\n   - 異常系テスト\n2. 負荷テスト\n   - 同時リクエスト処理\n   - 長時間稼働テスト\n3. セキュリティテスト\n   - 入力検証テスト\n   - CORS設定テスト\n4. 統合テストスイートのAPI応答確認テストを実行",
+      "priority": "high",
+      "dependencies": [
+        5,
+        6
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 9,
+      "title": "フロントエンド・バックエンド統合",
+      "description": "UIとバックエンドAPIを統合し、完全な機能を実現する",
+      "details": "フロントエンドとバックエンドを統合する：\n\n1. APIクライアントの実装（static/js/api_client.js）\n   - 各APIエンドポイントへの接続関数\n   - レスポンス処理\n   - エラーハンドリング\n\n2. UI要素とAPI連携\n   - 会話入力フォーム → 構造化API\n   - 検索フォーム → 検索API\n   - TaskMaster表示 → タスクAPI\n\n3. データ表示コンポーネント\n   - 構造化結果表示\n   - 検索結果表示\n   - TaskMaster情報表示\n\n4. リアルタイム更新\n   - ポーリングまたはWebSocket実装\n   - 状態変化の反映\n\n使用技術：\n- JavaScript（ES6+）\n- Fetch API\n- DOM操作（Vanilla JS）\n- EventSource（サーバーイベント）",
+      "testStrategy": "1. 統合機能テスト\n   - 会話入力→構造化→表示フロー\n   - 検索→結果表示フロー\n   - TaskMaster情報表示フロー\n2. エラー処理テスト\n   - API接続エラー\n   - データ処理エラー\n3. ユーザビリティテスト\n   - 実際のユースケースシナリオ\n4. 統合テストスイートのデータフロー検証を実行",
+      "priority": "high",
+      "dependencies": [
+        7,
+        8
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 10,
+      "title": "テストスイート実装",
+      "description": "PRDで定義された品質保証テストスイートを実装する",
+      "details": "PRDで定義された5つのテストスイートを実装する：\n\n1. IntegrationTestRunner（src/tests/integration_test_runner.py）\n   - TaskMaster接続テスト\n   - データフロー検証\n   - API応答確認\n\n2. ScenarioTestSuite（src/tests/scenario_test_suite.py）\n   - 会話入力→構造化→保存\n   - 検索→取得→表示\n   - エラーハンドリング\n\n3. PerformanceTestSuite（src/tests/performance_test_suite.py）\n   - 処理時間測定（目標：3秒以内）\n   - 同時処理数確認\n   - メモリ使用量監視\n\n4. SecurityTestSuite（src/tests/security_test_suite.py）\n   - データ暗号化確認\n   - アクセス制御検証\n   - インジェクション対策\n\n5. CompatibilityTestSuite（src/tests/compatibility_test_suite.py）\n   - Claude API互換性\n   - ブラウザ互換性\n   - データ形式互換性\n\n使用技術：\n- Python 3.10以上\n- pytest 7.4.0（テストフレームワーク）\n- pytest-asyncio 0.21.1（非同期テスト）\n- locust 2.16.1（負荷テスト）\n- pytest-cov 4.1.0（カバレッジ測定）",
+      "testStrategy": "1. 各テストスイートの単体テスト\n2. テスト自動化スクリプトの作成\n3. CI/CD統合（ローカル実行用）\n4. テストレポート生成\n5. check_rules.pyによるコード規約チェック",
+      "priority": "high",
+      "dependencies": [
+        3,
+        4,
+        5,
+        6,
+        8
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 11,
+      "title": "Issue管理システム実装",
+      "description": "問題対処フレームワークに基づくIssue管理システムを実装する",
+      "details": "Issue管理システムを実装する：\n\n1. Issue.mdテンプレート作成（docs/templates/issue_template.md）\n   - 問題報告フォーマット\n   - 改善アイデアフォーマット\n\n2. Issue管理ユーティリティの実装（src/utils/issue_manager.py）\n   - 新規Issue作成関数\n   - Issue一覧表示関数\n   - Issue更新関数\n   - 優先順位管理関数\n\n3. 判定基準の実装\n   - MVP必須/後回し可能の判定ロジック\n   - 優先度自動計算\n\n4. CLIインターフェース\n   - コマンドライン操作\n   - 対話式Issue作成\n\n使用技術：\n- Python 3.10以上\n- click 8.1.7（CLIフレームワーク）\n- rich 13.5.2（ターミナル出力装飾）\n- PyYAML 6.0（設定管理）",
+      "testStrategy": "1. Issue作成テスト\n   - フォーマット検証\n   - 保存確認\n2. Issue管理機能テスト\n   - 一覧表示\n   - 更新\n   - 優先順位管理\n3. CLI操作テスト\n4. エラーハンドリングテスト",
+      "priority": "medium",
+      "dependencies": [
+        1
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 12,
+      "title": "レガシーコード評価・統合システム実装",
+      "description": "過去資産の活用戦略に基づくレガシーコード評価・統合システムを実装する",
+      "details": "レガシーコード評価・統合システムを実装する：\n\n1. レガシーコード評価ツールの作成（src/utils/legacy_evaluator.py）\n   - コード静的解析\n   - 依存関係チェック\n   - 互換性評価\n\n2. 使用記録管理システム\n   - used_legacy.md自動更新\n   - 使用状況トラッキング\n\n3. レガシーコードインポートユーティリティ\n   - 安全なインポート機能\n   - 参照リンク作成\n\n4. 評価基準の実装\n   - 自動評価ロジック\n   - 手動評価サポート\n\n使用技術：\n- Python 3.10以上\n- ast（Pythonコード解析）\n- pycodestyle 2.11.0（コード品質チェック）\n- importlib（動的インポート）\n- GitPython 3.1.31（コード履歴解析）",
+      "testStrategy": "1. レガシーコード評価テスト\n   - 静的解析テスト\n   - 依存関係チェックテスト\n2. 使用記録管理テスト\n   - 記録フォーマット検証\n   - 更新機能テスト\n3. インポートユーティリティテスト\n   - 安全なインポートテスト\n   - 参照リンクテスト\n4. 評価基準テスト",
+      "priority": "medium",
+      "dependencies": [
+        1
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 13,
+      "title": "視覚的サマリー生成機能実装",
+      "description": "構造化されたデータから視覚的なサマリーを生成する機能を実装する",
+      "details": "視覚的サマリー生成機能を実装する：\n\n1. サマリージェネレーターの作成（src/utils/summary_generator.py）\n   - 構造化データ解析\n   - 重要ポイント抽出\n   - 視覚的要素生成\n\n2. 出力フォーマット\n   - HTML+CSS（Web表示用）\n   - Markdown（文書用）\n   - JSON（データ交換用）\n\n3. 視覚化コンポーネント\n   - 目標・課題のハイライト\n   - 解決策のリスト化\n   - コスト・時間・パフォーマンスの図表化\n\n4. カスタマイズオプション\n   - 表示項目選択\n   - スタイル設定\n   - 詳細度調整\n\n使用技術：\n- Python 3.10以上\n- Jinja2 3.1.2（テンプレートエンジン）\n- markdown 3.4.3（Markdown生成）\n- pygal 3.0.0（SVGグラフ生成）\n- weasyprint 59.0（PDF生成、オプション）",
+      "testStrategy": "1. サマリー生成テスト\n   - 各出力フォーマットのテスト\n   - 内容正確性検証\n2. 視覚化コンポーネントテスト\n   - 表示テスト\n   - レスポンシブ対応テスト\n3. カスタマイズオプションテスト\n4. パフォーマンステスト",
+      "priority": "medium",
+      "dependencies": [
+        5,
+        6
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 14,
+      "title": "エラーハンドリングとロギングシステム実装",
+      "description": "包括的なエラーハンドリングとロギングシステムを実装する",
+      "details": "エラーハンドリングとロギングシステムを実装する：\n\n1. カスタム例外クラスの定義（src/utils/exceptions.py）\n   - APIエラー\n   - データ処理エラー\n   - 構造化エラー\n   - 設定エラー\n\n2. グローバルエラーハンドラーの実装\n   - 例外捕捉\n   - エラーメッセージ生成\n   - リカバリーアクション\n\n3. 階層的ロギングシステム\n   - ログレベル設定\n   - ログローテーション\n   - フォーマット定義\n\n4. エラー通知システム\n   - コンソール通知\n   - UI通知\n   - Issue自動作成（重大エラー）\n\n使用技術：\n- Python 3.10以上\n- logging（標準ライブラリ）\n- structlog 23.1.0（構造化ログ）\n- sentry-sdk 1.30.0（エラー監視、オプション）\n- rich.traceback（読みやすいトレースバック）",
+      "testStrategy": "1. 各例外クラスのテスト\n2. エラーハンドラーテスト\n   - 各種エラーシナリオ\n   - リカバリーアクション検証\n3. ロギングシステムテスト\n   - ログレベル動作確認\n   - ローテーション確認\n4. 通知システムテスト\n5. エラー発生率測定（目標：5%以下）",
+      "priority": "high",
+      "dependencies": [
+        3,
+        4,
+        8
+      ],
+      "status": "pending",
+      "subtasks": []
+    },
+    {
+      "id": 15,
+      "title": "ドキュメント作成と最終統合テスト",
+      "description": "ユーザーマニュアル、開発者ドキュメントを作成し、最終統合テストを実施する",
+      "details": "ドキュメント作成と最終統合テストを実施する：\n\n1. ドキュメント作成\n   - ユーザーマニュアル（docs/user_manual.md）\n   - 開発者ドキュメント（docs/developer_guide.md）\n   - API仕様書（docs/api_spec.md）\n   - アーキテクチャ概要（docs/architecture.md）\n\n2. 最終統合テスト\n   - 全テストスイートの実行\n   - エンドツーエンドテスト\n   - 実際のユースケースシナリオテスト\n\n3. パフォーマンス最終確認\n   - 処理時間測定\n   - メモリ使用量確認\n   - API応答時間確認\n\n4. 成功判定基準の検証\n   - 黒澤工務店データでのテスト\n   - 提案書作成時間短縮確認\n   - エラー発生率確認\n\n使用技術：\n- Markdown\n- MkDocs 1.5.2（ドキュメント生成）\n- pytest 7.4.0（テスト実行）\n- locust 2.16.1（負荷テスト）",
+      "testStrategy": "1. ドキュメント正確性検証\n2. 全テストスイート実行\n   - IntegrationTestRunner\n   - ScenarioTestSuite\n   - PerformanceTestSuite\n   - SecurityTestSuite\n   - CompatibilityTestSuite\n3. 成功判定基準の検証\n   - 構造化処理時間（3秒以内）\n   - 検索応答時間（1秒以内）\n   - システム稼働率（95%以上）\n   - 構造化精度（80%以上）\n   - エラー発生率（5%以下）",
+      "priority": "medium",
+      "dependencies": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "status": "pending",
+      "subtasks": []
+    }
+  ]
+}

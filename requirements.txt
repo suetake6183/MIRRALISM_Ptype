@@ -1,0 +1,36 @@
+# MIRRALISM プロトタイプ必要パッケージ
+# ======================================
+
+# Claude API関連
+anthropic>=0.25.0
+
+# 環境変数管理
+python-dotenv>=1.0.0
+
+# HTTP リクエスト
+requests>=2.31.0
+
+# YAML設定ファイル読み込み
+PyYAML>=6.0
+
+# JSON処理
+jsonschema>=4.19.0
+
+# 日時処理
+python-dateutil>=2.8.2
+
+# ファイル管理
+pathlib2>=2.3.7
+
+# ログ管理
+colorlog>=6.7.0
+
+# テスト関連
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.1.0
+
+# 開発用ツール
+black>=23.7.0
+flake8>=6.0.0
+mypy>=1.5.0 
